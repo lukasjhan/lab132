@@ -1,0 +1,16 @@
+{
+  "name": "lab132",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "ts-node isSpam.ts",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  }
+}
