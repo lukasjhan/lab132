@@ -1,3 +1,9 @@
+function getAllUrls(Content: string): string[] {
+  const regex = /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/g;
+  const urls = Content.match(regex);
+  return urls ?? [];
+}
+
 /*
 @param Content
   Is a text string that a user wrote.
