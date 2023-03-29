@@ -34,16 +34,8 @@ const fetchUrlToCheckSpam = async (
     throw new Error(`${url} Response is not ok`);
   }
 
-  if (response.redirected) {
-    const redirectedUrl = response.url;
-    if (checkUrlsIncludeSpamLink([redirectedUrl], spamLinkDomains)) {
-      return true;
-    }
-    return isSpam(redirectedUrl, spamLinkDomains, redirectionDepth - 1);
-  }
-
-  const text = await response.text();
-  return isSpam(text, spamLinkDomains, redirectionDepth - 1);
+  const content = response.redirected ? response.url : await response.text();
+  return isSpam(content, spamLinkDomains, redirectionDepth - 1);
 };
 
 /*
