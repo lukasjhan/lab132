@@ -1,0 +1,43 @@
+service: spam-lambda
+provider:
+  name: aws
+  runtime: nodejs16.x
+  versionFunctions: false
+  region: ap-northeast-2
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:*'
+        - 'sqs:*'
+      Resource: '*'
+
+custom:
+  prune:
+    automatic: true
+    number: 30
+  serverless-offline:
+    noPrependStageInUrl: true
+    lambdaPort: null
+  logRetentionInDays: 14
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-prune-plugin
+
+functions:
+  helloWorld:
+    handler: src/handler.spam
+    memorySize: 128
+    timeout: 3
+    events:
+      - http:
+          path: spam
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Content-Length
+              - X-Version
+            allowCredentials: true
