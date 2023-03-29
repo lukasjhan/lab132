@@ -1,3 +1,5 @@
+const fetchUrlCache = new Map<string, string>();
+
 const getAllUrls = (Content: string): string[] => {
   const regex =
     /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/g;
@@ -25,11 +27,19 @@ const checkUrlsIncludeSpamLink = (
 }
 
 const getContentsFromUrl = async (url: string) => {
+  const cachedContent = fetchUrlCache.get(url);
+  if (cachedContent) {
+    return cachedContent;
+  }
+
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`${url} Response is not ok`);
   }
-  return response.redirected ? response.url : await response.text();
+  
+  const content = response.redirected ? response.url : await response.text();
+  fetchUrlCache.set(url, content);
+  return content;
 }
 
 const fetchUrlToCheckSpam = async (
