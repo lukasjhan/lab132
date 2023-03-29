@@ -35,3 +35,8 @@ const isSpam = async (
 import { isSpam } from "spam-filter";
 isSpam("spam spam https://a.com", ["cc.com", "b.com"], 3);
 ```
+
+## Directory Structure
+
+* simple: Simple implementation of spam filter. You can find the implementation in `src/isSpam.ts`.
+* spam-lambda: AWS Lambda implementation of spam filter with redis cache.
