@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "ts-node isSpam.ts",
+    "start": "ts-node src/isSpam.ts",
     "build": "tsc"
   },
   "author": "",
