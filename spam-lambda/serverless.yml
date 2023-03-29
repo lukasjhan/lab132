@@ -41,3 +41,7 @@ functions:
               - Content-Length
               - X-Version
             allowCredentials: true
+    environment:
+      REDIS_URL: ${env:REDIS_URL}
+      REDIS_URL: ${env:REDIS_USERNAME}
+      REDIS_URL: ${env:REDIS_PASSWORD}

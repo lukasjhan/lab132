@@ -4,7 +4,11 @@ let client: ReturnType<typeof redis.createClient> | undefined = undefined;
 
 const getRedisClient = () => {
   if (!client) {
-    client = redis.createClient();
+    client = redis.createClient({
+      url: process.env.REDIS_URL,
+      username: process.env.REDIS_USERNAME,
+      password: process.env.REDIS_PASSWORD,
+    });
   }
   return client;
 };
