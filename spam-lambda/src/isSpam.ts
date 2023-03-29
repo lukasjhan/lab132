@@ -1,33 +1,43 @@
-const fetchUrlCache = new Map<string, string>();
+import * as redis from 'redis';
+import { URL_TTS_SEC } from './contants/redis';
+let client: ReturnType<typeof redis.createClient> | undefined = undefined;
+
+const getRedisClient = () => {
+  if (!client) {
+    client = redis.createClient();
+  }
+  return client;
+};
 
 const getAllUrls = (Content: string): string[] => {
-  const regex =
-    /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/g;
+  const regex = /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/g;
   const urls = Content.match(regex);
   return urls ?? [];
-}
+};
 
 const checkUrlsIncludeSpamLink = (
   urls: string[],
-  spamLinkDomains: string[]
+  spamLinkDomains: string[],
 ): boolean => {
   if (urls.length === 0) {
     return false;
   }
 
-  const hostnames = urls.map((url) => {
+  const hostnames = urls.map(url => {
     const hostname = new URL(url).hostname;
     return hostname;
   });
 
-  if (hostnames.some((hostname) => spamLinkDomains.includes(hostname))) {
+  if (hostnames.some(hostname => spamLinkDomains.includes(hostname))) {
     return true;
   }
   return false;
-}
+};
 
 const getContentsFromUrl = async (url: string) => {
-  const cachedContent = fetchUrlCache.get(url);
+  const redisClient = getRedisClient();
+
+  const cachedContent = await redisClient.get(url);
   if (cachedContent) {
     return cachedContent;
   }
@@ -36,16 +46,16 @@ const getContentsFromUrl = async (url: string) => {
   if (!response.ok) {
     throw new Error(`${url} Response is not ok`);
   }
-  
+
   const content = response.redirected ? response.url : await response.text();
-  fetchUrlCache.set(url, content);
+  await redisClient.set(url, content, { EX: URL_TTS_SEC });
   return content;
-}
+};
 
 const fetchUrlToCheckSpam = async (
   url: string,
   spamLinkDomains: string[],
-  redirectionDepth: number
+  redirectionDepth: number,
 ) => {
   const content = await getContentsFromUrl(url);
   return isSpam(content, spamLinkDomains, redirectionDepth - 1);
@@ -72,7 +82,7 @@ const fetchUrlToCheckSpam = async (
 export const isSpam = async (
   Content: string,
   spamLinkDomains: string[],
-  redirectionDepth: number
+  redirectionDepth: number,
 ): Promise<boolean> => {
   const urls = getAllUrls(Content);
   if (checkUrlsIncludeSpamLink(urls, spamLinkDomains)) {
@@ -84,15 +94,15 @@ export const isSpam = async (
   }
 
   const results = await Promise.all(
-    urls.map(async (url) => {
+    urls.map(async url => {
       try {
         return fetchUrlToCheckSpam(url, spamLinkDomains, redirectionDepth);
       } catch (err) {
         console.error(err);
         return false;
       }
-    })
+    }),
   );
 
   return results.includes(true);
-}
+};
