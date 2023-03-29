@@ -1,14 +1,14 @@
-function getAllUrls(Content: string): string[] {
+const getAllUrls = (Content: string): string[] => {
   const regex =
     /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/g;
   const urls = Content.match(regex);
   return urls ?? [];
 }
 
-function checkUrlsIncludeSpamLink(
+const checkUrlsIncludeSpamLink = (
   urls: string[],
   spamLinkDomains: string[]
-): boolean {
+): boolean => {
   if (urls.length === 0) {
     return false;
   }
@@ -24,17 +24,20 @@ function checkUrlsIncludeSpamLink(
   return false;
 }
 
+const getContentsFromUrl = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`${url} Response is not ok`);
+  }
+  return response.redirected ? response.url : await response.text();
+}
+
 const fetchUrlToCheckSpam = async (
   url: string,
   spamLinkDomains: string[],
   redirectionDepth: number
 ) => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`${url} Response is not ok`);
-  }
-
-  const content = response.redirected ? response.url : await response.text();
+  const content = await getContentsFromUrl(url);
   return isSpam(content, spamLinkDomains, redirectionDepth - 1);
 };
 
@@ -56,11 +59,11 @@ const fetchUrlToCheckSpam = async (
 @return Promise<boolean>
   Asynchronously return if the content is a spam.
 */
-export async function isSpam(
+export const isSpam = async (
   Content: string,
   spamLinkDomains: string[],
   redirectionDepth: number
-): Promise<boolean> {
+): Promise<boolean> => {
   const urls = getAllUrls(Content);
   if (checkUrlsIncludeSpamLink(urls, spamLinkDomains)) {
     return true;
