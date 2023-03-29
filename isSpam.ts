@@ -21,6 +21,6 @@ function getAllUrls(Content: string): string[] {
 @return Promise<boolean>
   Asynchronously return if the content is a spam.
 */
-async function isSpam(Content: string, spamLinkDomains: string[], redirectionDepth: number): boolean {
+async function isSpam(Content: string, spamLinkDomains: string[], redirectionDepth: number): Promise<boolean> {
 
 }
